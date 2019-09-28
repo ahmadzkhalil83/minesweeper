@@ -4,7 +4,7 @@ import android.graphics.Point
 import kotlin.random.Random
 
 class CoordinatesGenerator{
-    fun getRandomCoordinate(min: Int = 0, max: Int): Int {
+    private fun getRandomCoordinate(min: Int = 0, max: Int): Int {
         return Random.nextInt(min, max)
     }
 

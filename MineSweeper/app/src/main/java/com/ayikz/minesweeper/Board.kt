@@ -1,6 +1,7 @@
 package com.ayikz.minesweeper
 
 import android.graphics.Point
+import android.support.annotation.VisibleForTesting
 import com.ayikz.minesweeper.CellState.*
 
 class Board(val verticalCells: Int,
@@ -9,9 +10,13 @@ class Board(val verticalCells: Int,
             val coordinatesGenerator: CoordinatesGenerator) {
 
     var cells = arrayOf<Array<Cell>>()
+    private var mineLocations = HashSet<Point>()
+    @VisibleForTesting
+    var flaggedLocations = HashSet<Point>()
 
     init {
-        generateBoard(getMineLocations())
+        mineLocations = getMineLocations()
+        generateBoard()
         scanForNeighboringMines()
     }
 
@@ -21,6 +26,7 @@ class Board(val verticalCells: Int,
         if (cell.state == OPEN) return
 
         if (cell.state == FLAGGED) {
+            flaggedLocations.remove(Point(cell.coordinates.x, cell.coordinates.y))
             cell.state = CLOSED
             return
         }
@@ -35,6 +41,21 @@ class Board(val verticalCells: Int,
         if (cell.state == FLAGGED) return
 
         cell.state = FLAGGED
+        flaggedLocations.add(Point(cell.coordinates.x, cell.coordinates.y))
+
+        if (isAllMinesFlagged()) throw WonException()
+    }
+
+    private fun isAllMinesFlagged() : Boolean{
+        if (flaggedLocations.count() == mineLocations.count()) {
+            for (location in flaggedLocations) {
+                if (!mineLocations.contains(location)) {
+                    return false
+                }
+            }
+            return true
+        }
+        return false
     }
 
     private fun revealSafeArea(cell: Cell) {
@@ -98,17 +119,17 @@ class Board(val verticalCells: Int,
         return mines
     }
 
-    private fun generateBoard(mineLocations: HashSet<Point>) {
+    private fun generateBoard() {
         for (x in 0 until horizontalCells) {
             var horizontalCells = arrayOf<Cell>()
             for (y in 0 until verticalCells) {
-                horizontalCells += createCell(mineLocations, x, y)
+                horizontalCells += createCell(x, y)
             }
             cells += horizontalCells
         }
     }
 
-    private fun createCell(mineLocations: HashSet<Point>, x: Int, y: Int): Cell {
+    private fun createCell(x: Int, y: Int): Cell {
         val cell = Cell(Point(x, y))
         cell.hasMine = mineLocations.contains(cell.coordinates)
 

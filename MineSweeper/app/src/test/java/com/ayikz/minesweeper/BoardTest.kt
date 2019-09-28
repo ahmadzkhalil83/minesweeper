@@ -7,6 +7,8 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -175,22 +177,49 @@ class BoardTest {
     }
 
     @Test
-    fun `when cell is flagged on board, then cell state changes to FLAGGED`() {
-        val board = Board(5, 5, 0, coordinatorGenerator)
+    fun `when cell is flagged on board, then cell state changes to FLAGGED and location added to flaggedLocations`() {
+        val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        val board = Board(5, 5, 1, mockedCoordinatorGenerator)
         val cell = board.cellAt(0,0)
         board.flagCell(cell)
 
         assertThat(cell.state, equalTo(FLAGGED))
+        assertTrue(board.flaggedLocations.contains(Point(cell.coordinates.x, cell.coordinates.y)))
     }
 
     @Test
     fun `when flagged cell is tapped on board, then cell state changes to CLOSED`() {
-        val board = Board(5, 5, 0, coordinatorGenerator)
+        val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        val board = Board(5, 5, 1, mockedCoordinatorGenerator)
         val cell = board.cellAt(0,0)
         board.flagCell(cell)
         assertThat(cell.state, equalTo(FLAGGED))
         board.tap(cell)
         assertThat(cell.state, equalTo(CLOSED))
+    }
+
+    @Test(expected = WonException::class)
+    fun `when all mines have been flagged, board throws WonException`() {
+        val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        val board = Board(5, 5, 1, mockedCoordinatorGenerator)
+        val cell = board.cellAt(2,2)
+        board.flagCell(cell)
+    }
+
+    @Test
+    fun `when flagged cell is tapped on board, location is removed from flagged locations`() {
+        val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        val board = Board(5, 5, 1, mockedCoordinatorGenerator)
+        val cell = board.cellAt(0,0)
+        board.flagCell(cell)
+        assertThat(cell.state, equalTo(FLAGGED))
+        assertTrue(board.flaggedLocations.contains(Point(cell.coordinates.x, cell.coordinates.y)))
+        board.tap(cell)
+        assertFalse(board.flaggedLocations.contains(Point(cell.coordinates.x, cell.coordinates.y)))
     }
 }
 
