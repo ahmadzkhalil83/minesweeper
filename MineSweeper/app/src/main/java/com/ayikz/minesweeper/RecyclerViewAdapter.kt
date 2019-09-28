@@ -5,11 +5,12 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import android.widget.TextView
 
 class RecyclerViewAdapter(var context: Context,
                           val listener: RecyclerViewItemListener,
-                          var board: Board) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
+                          board: Board) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
 
     var cells = board.cells.flatten()
 
@@ -19,15 +20,18 @@ class RecyclerViewAdapter(var context: Context,
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
+    inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener, View.OnLongClickListener {
 
         var textView: TextView
+        var layout: RelativeLayout
         private var cell: Cell? = null
 
         init {
 
             v.setOnClickListener(this)
+            v.setOnLongClickListener(this)
             textView = v.findViewById(R.id.tv_cell_title)
+            layout = v.findViewById(R.id.lyt_cell)
 
         }
 
@@ -39,6 +43,14 @@ class RecyclerViewAdapter(var context: Context,
             cell?.let {
                 listener.onItemClick(it)
             }
+        }
+
+        override fun onLongClick(view: View?): Boolean {
+            cell?.let {
+                listener.onItemLongClick(it)
+            }
+
+            return true
         }
     }
 
@@ -52,7 +64,8 @@ class RecyclerViewAdapter(var context: Context,
         val cell = cells[position]
         holder.setCell(cell)
 
-        holder.textView.text = if (cell.isOpen) cell.neighboringMines.toString() else ""
+        holder.textView.text = cell.getCellText()
+        holder.layout.setBackgroundResource(cell.background())
     }
 
     override fun getItemCount(): Int {
@@ -61,5 +74,6 @@ class RecyclerViewAdapter(var context: Context,
 
     interface RecyclerViewItemListener {
         fun onItemClick(cell: Cell)
+        fun onItemLongClick(cell: Cell)
     }
 }

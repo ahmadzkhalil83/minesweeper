@@ -5,7 +5,8 @@
         android:layout_height="wrap_content"
         xmlns:tools="http://schemas.android.com/tools"
         android:background="@drawable/cell_borders"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:id="@+id/lyt_cell">
 
     <TextView
             android:id="@+id/tv_cell_title"

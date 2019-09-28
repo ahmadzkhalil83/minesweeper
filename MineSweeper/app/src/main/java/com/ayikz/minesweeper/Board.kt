@@ -1,11 +1,12 @@
 package com.ayikz.minesweeper
 
 import android.graphics.Point
+import com.ayikz.minesweeper.CellState.*
 
 class Board(val verticalCells: Int,
             val horizontalCells: Int,
             private val numberOfMines: Int = 0,
-            val coordinatorGenerator: CoordinatorGenerator) {
+            val coordinatesGenerator: CoordinatesGenerator) {
 
     var cells = arrayOf<Array<Cell>>()
 
@@ -17,11 +18,23 @@ class Board(val verticalCells: Int,
     fun cellAt(x: Int, y: Int) = cells[x][y]
 
     fun tap(cell: Cell) {
-        if (cell.isOpen) return
+        if (cell.state == OPEN) return
+
+        if (cell.state == FLAGGED) {
+            cell.state = CLOSED
+            return
+        }
+
         if (cell.hasMine) throw MineException()
 
-        cell.isOpen = true
+        cell.state = OPEN
         revealSafeArea(cell)
+    }
+
+    fun flagCell(cell: Cell) {
+        if (cell.state == FLAGGED) return
+
+        cell.state = FLAGGED
     }
 
     private fun revealSafeArea(cell: Cell) {
@@ -31,13 +44,14 @@ class Board(val verticalCells: Int,
 
         while (neighboringCells.count() > 0) {
             val neighboringCell = neighboringCells.first()
-            if (neighboringCell.isOpen) {
+            if (neighboringCell.state == OPEN) {
                 neighboringCells.remove(neighboringCell)
                 continue
             }
 
+            neighboringCell.state = OPEN
+
             if (neighboringCell.neighboringMines == 0) {
-                neighboringCell.isOpen = true
                 neighboringCells.addAll(getNeighboringCells(neighboringCell))
             }
 
@@ -51,8 +65,20 @@ class Board(val verticalCells: Int,
         val y = cell.coordinates.y
 
         neighbors.apply {
-            if (!isLeftBorderCell(x)) add(cells[x - 1][y])
-            if (!isRightBorderCell(x)) add(cells[x + 1][y])
+            if (!isLeftBorderCell(x)) {
+                add(cells[x - 1][y])
+                // handle corner cells
+                if (!isTopBorderCell(y)) add(cells[x - 1][y - 1])
+                if (!isBottomBorderCell(y)) add(cells[x - 1][y + 1])
+            }
+
+            if (!isRightBorderCell(x)) {
+                add(cells[x + 1][y])
+                // handle corner cells
+                if (!isTopBorderCell(y)) add(cells[x + 1][y - 1])
+                if (!isBottomBorderCell(y)) add(cells[x + 1][y + 1])
+            }
+
             if (!isTopBorderCell(y)) add(cells[x][y - 1])
             if (!isBottomBorderCell(y)) add(cells[x][y + 1])
         }
@@ -65,29 +91,28 @@ class Board(val verticalCells: Int,
         (0 until numberOfMines).forEach { _ ->
             var point: Point
             do {
-                point = getRandomMineCoordinate()
+                point = coordinatesGenerator.getRandomPointOnAxis(horizontalCells, verticalCells)
             } while (mines.contains(point))
             mines.add(point)
         }
         return mines
     }
 
-    private fun getRandomMineCoordinate(): Point {
-        val xCoordinate = coordinatorGenerator.getRandomCoordinate(max = horizontalCells)
-        val yCoordinate = coordinatorGenerator.getRandomCoordinate(max = verticalCells)
-        return Point(xCoordinate, yCoordinate)
-    }
-
     private fun generateBoard(mineLocations: HashSet<Point>) {
         for (x in 0 until horizontalCells) {
             var horizontalCells = arrayOf<Cell>()
             for (y in 0 until verticalCells) {
-                val cell = Cell(Point(x, y))
-                cell.hasMine = mineLocations.contains(cell.coordinates)
-                horizontalCells += cell
+                horizontalCells += createCell(mineLocations, x, y)
             }
             cells += horizontalCells
         }
+    }
+
+    private fun createCell(mineLocations: HashSet<Point>, x: Int, y: Int): Cell {
+        val cell = Cell(Point(x, y))
+        cell.hasMine = mineLocations.contains(cell.coordinates)
+
+        return cell
     }
 
     private fun scanForNeighboringMines() {
