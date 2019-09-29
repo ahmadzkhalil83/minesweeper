@@ -1,4 +1,4 @@
-package com.ayikz.minesweeper
+package com.ayikz.minesweeper.ui
 
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -7,10 +7,14 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.TextView
+import com.ayikz.minesweeper.*
+import javax.inject.Inject
 
-class PlayActivity : AppCompatActivity(), RecyclerViewAdapter.RecyclerViewItemListener {
+class PlayActivity : AppCompatActivity(),
+    RecyclerViewAdapter.RecyclerViewItemListener {
 
-    // TODO: Inject
+    @Inject
+    lateinit var playViewModelFactory: PlayViewModelFactory
     private lateinit var viewModel: PlayViewModel
 
     private var adapter: RecyclerViewAdapter? = null
@@ -20,6 +24,8 @@ class PlayActivity : AppCompatActivity(), RecyclerViewAdapter.RecyclerViewItemLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_play)
 
+        (application as App).playComponent.inject(this)
+
         flagsTextView = findViewById(R.id.tv_flags_remaining)
 
         setupViewModel()
@@ -27,33 +33,39 @@ class PlayActivity : AppCompatActivity(), RecyclerViewAdapter.RecyclerViewItemLi
     }
 
     private fun setupViewModel() {
-        viewModel = ViewModelProviders.of(this, PlayViewModelFactory())[PlayViewModel::class.java]
+        viewModel = ViewModelProviders.of(this, playViewModelFactory)[PlayViewModel::class.java]
         viewModel.navigator = navigator
     }
 
     private fun setupRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        adapter = RecyclerViewAdapter(this, this, viewModel.board)
+        adapter = RecyclerViewAdapter(this, this, viewModel.getBoardCells())
         val layoutManager =
-            GridLayoutManager(this, PlayViewModel.cellCount, GridLayoutManager.VERTICAL, false)
+            GridLayoutManager(this,
+                viewModel.cellCount, GridLayoutManager.VERTICAL, false)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
     }
 
     override fun onItemClick(cell: Cell) {
         viewModel.onCellClicked(cell) {
-            adapter?.updateBoard(viewModel.board)
+            updateScreen()
         }
     }
 
     override fun onItemLongClick(cell: Cell) {
         viewModel.onCellLongClicked(cell) {
-            adapter?.updateBoard(viewModel.board)
-            flagsTextView?.text = viewModel.getRemainingFlags().toString()
+            updateScreen()
         }
     }
 
-    private val navigator: PlayNavigator = object : PlayNavigator {
+    private fun updateScreen(){
+        adapter?.updateBoard(viewModel.getBoardCells())
+        flagsTextView?.text = viewModel.getRemainingFlags().toString()
+    }
+
+    private val navigator: PlayNavigator = object :
+        PlayNavigator {
         override fun showYouWonAlertDialog() {
             showAlertDialog("You Won! ${viewModel.getHappyEmoticon()}",
                 "Hooray! You won the game. Play again?",
@@ -76,7 +88,7 @@ class PlayActivity : AppCompatActivity(), RecyclerViewAdapter.RecyclerViewItemLi
         return AlertDialog.Builder(this).setMessage(message).setTitle(title)
             .setPositiveButton(positiveButtonText) { _, _ ->
                 viewModel.generateBoard()
-                adapter?.updateBoard(viewModel.board)
+                adapter?.updateBoard(viewModel.getBoardCells())
                 flagsTextView?.text = viewModel.getRemainingFlags().toString()
             }.setNegativeButton(negativeButtonText) { _, _ ->
                 this.finish()

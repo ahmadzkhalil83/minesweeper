@@ -1,7 +1,6 @@
 package com.ayikz.minesweeper
 
 import android.graphics.Point
-import android.support.annotation.VisibleForTesting
 import com.ayikz.minesweeper.CellState.*
 
 class Board(val verticalCells: Int,
@@ -33,16 +32,27 @@ class Board(val verticalCells: Int,
         if (cell.hasMine) throw MineException()
 
         cell.state = OPEN
+
+        if (isOnlyMinesFlaggedOrClosed()) throw WonException()
+
         revealSafeArea(cell)
     }
 
     fun flagCell(cell: Cell) {
         if (cell.state == FLAGGED || cell.state == OPEN) return
 
+        if (flaggedLocations.count() == mineLocations.count()) return
+
         cell.state = FLAGGED
         flaggedLocations.add(Point(cell.coordinates.x, cell.coordinates.y))
 
         if (isAllMinesFlagged()) throw WonException()
+    }
+
+    //TODO test!!
+    private fun isOnlyMinesFlaggedOrClosed(): Boolean {
+        val remainingCells = cells.flatten().filter { it.isFlagVisible() || it.state == CLOSED }
+        return remainingCells.count() == mineLocations.count()
     }
 
     private fun isAllMinesFlagged() : Boolean{

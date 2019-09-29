@@ -1,4 +1,4 @@
-package com.ayikz.minesweeper
+package com.ayikz.minesweeper.ui
 
 interface PlayNavigator {
     fun showYouWonAlertDialog()

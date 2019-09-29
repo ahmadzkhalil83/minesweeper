@@ -1,25 +1,21 @@
-package com.ayikz.minesweeper
+package com.ayikz.minesweeper.ui
 
 import android.arch.lifecycle.ViewModel
+import com.ayikz.minesweeper.*
 import kotlin.random.Random
 
-class PlayViewModel : ViewModel() {
-    companion object {
-        const val cellCount = 10
-        const val mineCount = 14
-    }
-
+class PlayViewModel(private val boardManager: BoardManager) : ViewModel() {
     private val angryEmoticons = arrayOf("""¯\_(⊙︿⊙)_/¯""",
         """┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻""",
         """(╯°□°）╯︵ ┻━┻""",
         """(ノಠ ∩ಠ)ノ彡( \o°o)\""")
-    private val happyEmoticons = arrayOf("""ヽ(´▽`)/""",
-            """\(ᵔᵕᵔ)/""",
-            """(•̀ᴗ•́)و ̑̑""",
-            """♪♪ ヽ(ˇ∀ˇ )ゞ""")
+    private val happyEmoticons =
+        arrayOf("""ヽ(´▽`)/""", """\(ᵔᵕᵔ)/""", """(•̀ᴗ•́)و ̑̑""", """♪♪ ヽ(ˇ∀ˇ )ゞ""")
 
     var navigator: PlayNavigator? = null
-    // TODO: Inject
+    var cellCount = BoardManager.cellCount
+    var mineCount = BoardManager.mineCount
+
     lateinit var board: Board
 
     init {
@@ -27,8 +23,11 @@ class PlayViewModel : ViewModel() {
     }
 
     fun generateBoard() {
-        val coordinatorGenerator = CoordinatesGenerator()
-        board = Board(cellCount, cellCount, mineCount, coordinatorGenerator)
+        board = boardManager.generateBoard()
+    }
+
+    fun getBoardCells(): List<Cell> {
+        return board.cells.flatten()
     }
 
     fun onCellClicked(cell: Cell, performAction: () -> Unit) {
@@ -37,6 +36,8 @@ class PlayViewModel : ViewModel() {
             performAction.invoke()
         } catch (ex: MineException) {
             handleLosing()
+        } catch (e: WonException) {
+            handleWinning()
         }
     }
 
@@ -51,8 +52,9 @@ class PlayViewModel : ViewModel() {
 
     fun getRemainingFlags(): Int {
         val remaining = mineCount - board.flaggedLocations.count()
-        return if(remaining < 0) 0 else remaining
+        return if (remaining < 0) 0 else remaining
     }
+
     fun getHappyEmoticon() = getRandomItemFromArray(happyEmoticons)
     fun getAngryEmoticon() = getRandomItemFromArray(angryEmoticons)
 

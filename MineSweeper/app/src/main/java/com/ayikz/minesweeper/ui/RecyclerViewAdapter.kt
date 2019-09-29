@@ -1,4 +1,4 @@
-package com.ayikz.minesweeper
+package com.ayikz.minesweeper.ui
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
@@ -8,16 +8,16 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import com.ayikz.minesweeper.Cell
+import com.ayikz.minesweeper.R
 
 class RecyclerViewAdapter(var context: Context,
                           val listener: RecyclerViewItemListener,
-                          board: Board) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
+                          private var cells: List<Cell>) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
 
-    var cells = board.cells.flatten()
-
-    fun updateBoard(board: Board){
-        cells = arrayListOf()
-        cells = board.cells.flatten()
+    fun updateBoard(cells: List<Cell>){
+        this.cells = arrayListOf()
+        this.cells = cells
         notifyDataSetChanged()
     }
 
