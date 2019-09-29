@@ -10,9 +10,8 @@ class Board(val verticalCells: Int,
             val coordinatesGenerator: CoordinatesGenerator) {
 
     var cells = arrayOf<Array<Cell>>()
-    private var mineLocations = HashSet<Point>()
-    @VisibleForTesting
     var flaggedLocations = HashSet<Point>()
+    private var mineLocations = HashSet<Point>()
 
     init {
         mineLocations = getMineLocations()
@@ -38,7 +37,7 @@ class Board(val verticalCells: Int,
     }
 
     fun flagCell(cell: Cell) {
-        if (cell.state == FLAGGED) return
+        if (cell.state == FLAGGED || cell.state == OPEN) return
 
         cell.state = FLAGGED
         flaggedLocations.add(Point(cell.coordinates.x, cell.coordinates.y))

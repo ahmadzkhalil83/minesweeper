@@ -149,9 +149,9 @@ class CellTest {
     }
 
     @Test
-    fun `when cell is flagged, then cell text should be a flag`() {
+    fun `when cell is flagged, then cell flag should be visible`() {
         val cell = Cell(state = FLAGGED)
-        assertThat(cell.getCellText(), equalTo("F"))
+        assertTrue(cell.isFlagVisible())
     }
 }
 

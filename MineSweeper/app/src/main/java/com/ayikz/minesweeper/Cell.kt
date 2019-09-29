@@ -38,13 +38,11 @@ data class Cell(val coordinates: Point = Point(0, 0),
         }
     }
 
-    fun getCellText(): String {
-        return if (state == FLAGGED) {
-            "F"
-        } else if (state == OPEN && neighboringMines > 0) {
-            neighboringMines.toString()
-        } else {
-            ""
-        }
+    fun getCellText(): String = if (state == OPEN && neighboringMines > 0) {
+        neighboringMines.toString()
+    } else {
+        ""
     }
+
+    fun isFlagVisible() = state == FLAGGED
 }

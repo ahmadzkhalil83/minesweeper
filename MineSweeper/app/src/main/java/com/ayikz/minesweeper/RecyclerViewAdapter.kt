@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 
@@ -15,24 +16,24 @@ class RecyclerViewAdapter(var context: Context,
     var cells = board.cells.flatten()
 
     fun updateBoard(board: Board){
-        this.cells = arrayListOf()
-        this.cells = board.cells.flatten()
+        cells = arrayListOf()
+        cells = board.cells.flatten()
         notifyDataSetChanged()
     }
 
     inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener, View.OnLongClickListener {
 
         var textView: TextView
+        var imageView: ImageView
         var layout: RelativeLayout
         private var cell: Cell? = null
 
         init {
-
             v.setOnClickListener(this)
             v.setOnLongClickListener(this)
             textView = v.findViewById(R.id.tv_cell_title)
+            imageView = v.findViewById(R.id.img_cell_flag)
             layout = v.findViewById(R.id.lyt_cell)
-
         }
 
         fun setCell(cell: Cell){
@@ -65,6 +66,7 @@ class RecyclerViewAdapter(var context: Context,
         holder.setCell(cell)
 
         holder.textView.text = cell.getCellText()
+        holder.imageView.visibility = if (cell.isFlagVisible()) View.VISIBLE else View.GONE
         holder.layout.setBackgroundResource(cell.background())
     }
 

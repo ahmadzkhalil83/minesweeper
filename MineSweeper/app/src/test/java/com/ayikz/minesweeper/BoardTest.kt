@@ -221,5 +221,17 @@ class BoardTest {
         board.tap(cell)
         assertFalse(board.flaggedLocations.contains(Point(cell.coordinates.x, cell.coordinates.y)))
     }
+
+    @Test
+    fun `when open cell is flagged, cell should remain in open state`(){
+        val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        val board = Board(5, 5, 1, mockedCoordinatorGenerator)
+        val cell = board.cellAt(0,0)
+        board.tap(cell)
+        assertThat(cell.state, equalTo(OPEN))
+        board.flagCell(cell)
+        assertThat(cell.state, equalTo(OPEN))
+    }
 }
 
