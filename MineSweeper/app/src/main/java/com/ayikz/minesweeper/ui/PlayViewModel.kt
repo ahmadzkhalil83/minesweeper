@@ -4,7 +4,7 @@ import android.arch.lifecycle.ViewModel
 import com.ayikz.minesweeper.*
 import kotlin.random.Random
 
-class PlayViewModel(private val boardManager: BoardManager) : ViewModel() {
+class PlayViewModel(private val board: Board) : ViewModel() {
     private val angryEmoticons = arrayOf("""¯\_(⊙︿⊙)_/¯""",
         """┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻""",
         """(╯°□°）╯︵ ┻━┻""",
@@ -13,18 +13,8 @@ class PlayViewModel(private val boardManager: BoardManager) : ViewModel() {
         arrayOf("""ヽ(´▽`)/""", """\(ᵔᵕᵔ)/""", """(•̀ᴗ•́)و ̑̑""", """♪♪ ヽ(ˇ∀ˇ )ゞ""")
 
     var navigator: PlayNavigator? = null
-    var cellCount = BoardManager.cellCount
-    var mineCount = BoardManager.mineCount
-
-    lateinit var board: Board
-
-    init {
-        generateBoard()
-    }
-
-    fun generateBoard() {
-        board = boardManager.generateBoard()
-    }
+    var cellCount = Board.cellCount
+    var mineCount = Board.mineCount
 
     fun getBoardCells(): List<Cell> {
         return board.cells.flatten()
@@ -63,5 +53,9 @@ class PlayViewModel(private val boardManager: BoardManager) : ViewModel() {
     private fun getRandomItemFromArray(array: Array<String>): String {
         val index = Random.nextInt(0, array.size)
         return array[index]
+    }
+
+    fun refreshBoard() {
+        board.refresh()
     }
 }

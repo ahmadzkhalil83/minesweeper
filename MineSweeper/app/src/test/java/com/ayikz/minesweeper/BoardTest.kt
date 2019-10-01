@@ -7,8 +7,7 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -71,16 +70,14 @@ class BoardTest {
         val board = Board(10, 10, 0, coordinatesGenerator = coordinatorGenerator)
         val cell = board.cellAt(1, 1)
 
-        val neighboringCells = arrayListOf(
-            board.cellAt(0, 0),
+        val neighboringCells = arrayListOf(board.cellAt(0, 0),
             board.cellAt(0, 1),
             board.cellAt(0, 2),
             board.cellAt(1, 0),
             board.cellAt(1, 2),
             board.cellAt(2, 0),
             board.cellAt(2, 1),
-            board.cellAt(2, 2)
-        )
+            board.cellAt(2, 2))
 
         for (neighboringCell in neighboringCells) {
             assertThat(neighboringCell.state, equalTo(CLOSED))
@@ -98,11 +95,8 @@ class BoardTest {
         val board = Board(10, 10, 0, coordinatesGenerator = coordinatorGenerator)
         val cell = board.cellAt(0, 0)
 
-        val neighboringCells = arrayListOf(
-            board.cellAt(0, 1),
-            board.cellAt(1, 0),
-            board.cellAt(1, 1)
-        )
+        val neighboringCells =
+            arrayListOf(board.cellAt(0, 1), board.cellAt(1, 0), board.cellAt(1, 1))
 
         for (neighboringCell in neighboringCells) {
             assertThat(neighboringCell.state, equalTo(CLOSED))
@@ -120,11 +114,8 @@ class BoardTest {
         val board = Board(100, 100, 0, coordinatesGenerator = coordinatorGenerator)
         val cell = board.cellAt(99, 99)
 
-        val neighboringCells = arrayListOf(
-            board.cellAt(99, 98),
-            board.cellAt(98, 99),
-            board.cellAt(98, 98)
-        )
+        val neighboringCells =
+            arrayListOf(board.cellAt(99, 98), board.cellAt(98, 99), board.cellAt(98, 98))
 
         for (neighboringCell in neighboringCells) {
             assertThat(neighboringCell.state, equalTo(CLOSED))
@@ -166,7 +157,8 @@ class BoardTest {
     @Test
     fun `when there are mines on board, and cell is tapped, only safe cells will open`() {
         val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
-        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,
+            2))
         val board = Board(5, 5, 1, mockedCoordinatorGenerator)
         val cell = board.cellAt(0, 0)
 
@@ -179,9 +171,10 @@ class BoardTest {
     @Test
     fun `when cell is flagged on board, then cell state changes to FLAGGED and location added to flaggedLocations`() {
         val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
-        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,
+            2))
         val board = Board(5, 5, 1, mockedCoordinatorGenerator)
-        val cell = board.cellAt(0,0)
+        val cell = board.cellAt(0, 0)
         board.flagCell(cell)
 
         assertThat(cell.state, equalTo(FLAGGED))
@@ -191,9 +184,10 @@ class BoardTest {
     @Test
     fun `when flagged cell is tapped on board, then cell state changes to CLOSED`() {
         val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
-        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,
+            2))
         val board = Board(5, 5, 1, mockedCoordinatorGenerator)
-        val cell = board.cellAt(0,0)
+        val cell = board.cellAt(0, 0)
         board.flagCell(cell)
         assertThat(cell.state, equalTo(FLAGGED))
         board.tap(cell)
@@ -203,18 +197,20 @@ class BoardTest {
     @Test(expected = WonException::class)
     fun `when all mines have been flagged, board throws WonException`() {
         val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
-        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,
+            2))
         val board = Board(5, 5, 1, mockedCoordinatorGenerator)
-        val cell = board.cellAt(2,2)
+        val cell = board.cellAt(2, 2)
         board.flagCell(cell)
     }
 
     @Test
     fun `when flagged cell is tapped on board, location is removed from flagged locations`() {
         val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
-        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,
+            2))
         val board = Board(5, 5, 1, mockedCoordinatorGenerator)
-        val cell = board.cellAt(0,0)
+        val cell = board.cellAt(0, 0)
         board.flagCell(cell)
         assertThat(cell.state, equalTo(FLAGGED))
         assertTrue(board.flaggedLocations.contains(Point(cell.coordinates.x, cell.coordinates.y)))
@@ -223,15 +219,31 @@ class BoardTest {
     }
 
     @Test
-    fun `when open cell is flagged, cell should remain in open state`(){
+    fun `when open cell is flagged, cell should remain in open state`() {
         val mockedCoordinatorGenerator: CoordinatesGenerator = mock()
-        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,2))
+        whenever(mockedCoordinatorGenerator.getRandomPointOnAxis(any(), any())).thenReturn(Point(2,
+            2))
         val board = Board(5, 5, 1, mockedCoordinatorGenerator)
-        val cell = board.cellAt(0,0)
+        val cell = board.cellAt(0, 0)
         board.tap(cell)
         assertThat(cell.state, equalTo(OPEN))
         board.flagCell(cell)
         assertThat(cell.state, equalTo(OPEN))
+    }
+
+    @Test
+    fun `when board is refreshed, new cells mapping is generated`() {
+        val board = Board(5, 5, 1, coordinatorGenerator)
+        val cells = board.cells.flatten()
+        board.refresh()
+        val newCells = board.cells.flatten()
+        var isCellsTheSame = true
+        for (index in 0 until cells.count()) {
+            if (cells[index].neighboringMines != newCells[index].neighboringMines ) {
+                isCellsTheSame = false
+            }
+        }
+        assertFalse(isCellsTheSame)
     }
 }
 

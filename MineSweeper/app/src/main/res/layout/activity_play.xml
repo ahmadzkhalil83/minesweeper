@@ -16,12 +16,12 @@
             app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-                android:id="@+id/tv_flags_remaining"
+                android:id="@+id/flagsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:drawableLeft="@drawable/ic_flag"
-                android:text="15"
+                tools:text="15"
                 android:textSize="24sp"/>
 
     </RelativeLayout>

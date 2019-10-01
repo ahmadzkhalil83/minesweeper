@@ -1,6 +1,6 @@
 package com.ayikz.minesweeper.dependency
 
-import com.ayikz.minesweeper.BoardManager
+import com.ayikz.minesweeper.Board
 import com.ayikz.minesweeper.CoordinatesGenerator
 import com.ayikz.minesweeper.ui.PlayViewModelFactory
 import dagger.Module
@@ -15,12 +15,12 @@ class PlayModule {
     }
 
     @Provides
-    fun provideBoardManager(coordinatesGenerator: CoordinatesGenerator): BoardManager {
-        return BoardManager(coordinatesGenerator)
+    fun provideBoard(coordinatesGenerator: CoordinatesGenerator): Board {
+        return Board(Board.cellCount, Board.cellCount, Board.mineCount, coordinatesGenerator)
     }
 
     @Provides
-    fun providePlayViewModel(boardManager: BoardManager): PlayViewModelFactory {
-        return PlayViewModelFactory(boardManager)
+    fun providePlayViewModel(board: Board): PlayViewModelFactory {
+        return PlayViewModelFactory(board)
     }
 }

@@ -5,9 +5,10 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.widget.TextView
-import com.ayikz.minesweeper.*
+import com.ayikz.minesweeper.App
+import com.ayikz.minesweeper.Cell
+import com.ayikz.minesweeper.R
+import kotlinx.android.synthetic.main.activity_play.*
 import javax.inject.Inject
 
 class PlayActivity : AppCompatActivity(),
@@ -18,7 +19,6 @@ class PlayActivity : AppCompatActivity(),
     private lateinit var viewModel: PlayViewModel
 
     private var adapter: RecyclerViewAdapter? = null
-    private var flagsTextView: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,10 +26,13 @@ class PlayActivity : AppCompatActivity(),
 
         (application as App).playComponent.inject(this)
 
-        flagsTextView = findViewById(R.id.tv_flags_remaining)
-
         setupViewModel()
         setupRecyclerView()
+        setFlags()
+    }
+
+    private fun setFlags() {
+        flagsTextView.text = viewModel.getRemainingFlags().toString()
     }
 
     private fun setupViewModel() {
@@ -38,7 +41,6 @@ class PlayActivity : AppCompatActivity(),
     }
 
     private fun setupRecyclerView() {
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         adapter = RecyclerViewAdapter(this, this, viewModel.getBoardCells())
         val layoutManager =
             GridLayoutManager(this,
@@ -61,7 +63,7 @@ class PlayActivity : AppCompatActivity(),
 
     private fun updateScreen(){
         adapter?.updateBoard(viewModel.getBoardCells())
-        flagsTextView?.text = viewModel.getRemainingFlags().toString()
+        setFlags()
     }
 
     private val navigator: PlayNavigator = object :
@@ -87,9 +89,9 @@ class PlayActivity : AppCompatActivity(),
                                 negativeButtonText: String) {
         return AlertDialog.Builder(this).setMessage(message).setTitle(title)
             .setPositiveButton(positiveButtonText) { _, _ ->
-                viewModel.generateBoard()
+                viewModel.refreshBoard()
                 adapter?.updateBoard(viewModel.getBoardCells())
-                flagsTextView?.text = viewModel.getRemainingFlags().toString()
+                setFlags()
             }.setNegativeButton(negativeButtonText) { _, _ ->
                 this.finish()
             }.setCancelable(false).create().show()

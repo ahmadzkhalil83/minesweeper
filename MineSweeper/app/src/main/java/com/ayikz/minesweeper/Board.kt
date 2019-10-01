@@ -8,11 +8,24 @@ class Board(val verticalCells: Int,
             private val numberOfMines: Int = 0,
             val coordinatesGenerator: CoordinatesGenerator) {
 
-    var cells = arrayOf<Array<Cell>>()
-    var flaggedLocations = HashSet<Point>()
-    private var mineLocations = HashSet<Point>()
+    companion object {
+        const val cellCount = 10
+        const val mineCount = 15
+    }
+
+    lateinit var cells: Array<Array<Cell>>
+    lateinit var flaggedLocations: HashSet<Point>
+    private lateinit var mineLocations: HashSet<Point>
 
     init {
+        refresh()
+    }
+
+    fun refresh() {
+        cells = arrayOf()
+        flaggedLocations = HashSet()
+        mineLocations = HashSet()
+
         mineLocations = getMineLocations()
         generateBoard()
         scanForNeighboringMines()
